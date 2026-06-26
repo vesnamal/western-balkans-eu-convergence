@@ -1,0 +1,79 @@
+# config/indicators.yml
+# Single source of truth for the WB-EU convergence pipeline.
+# Frozen in Sprint 0, verified against the live World Bank API (2026-06-26).
+# Adding an indicator = add one entry under the right block.
+
+project:
+  analysis_window:
+    start: 2008          # common window; Kosovo economic data begins ~2008
+    end: 2024
+  notes: >
+    Common 2008-2024 window across all six. Window opens on the 2008-09 GFC;
+    do not over-interpret early-window movement as structural. See notebook Step 2.
+
+countries:
+  western_balkans:
+    - ALB   # Albania
+    - BIH   # Bosnia and Herzegovina
+    - XKX   # Kosovo (late start 2008; absent on productivity)
+    - MNE   # Montenegro
+    - MKD   # North Macedonia
+    - SRB   # Serbia
+  benchmarks:
+    eu_aggregate: EUU      # VERIFIED on live API, 17/17 yrs. "European Union" aggregate.
+    # CAVEAT: EUU likely tracks CURRENT membership (27 now, 28 pre-2020 UK exit) ->
+    #   possible structural break ~2020. Proposal benchmark is EU27 (fixed-definition).
+    #   DECIDE in Sprint 1: WB EUU as headline vs Eurostat EU27=100 (cross-validation).
+    comparators:           # recent EU entrants: "the path the WB might follow". VERIFIED 17/17.
+      - HRV  # Croatia
+      - BGR  # Bulgaria
+      - ROU  # Romania
+
+# WDI database (wbgapi default, db=2). Fetched via wbgapi.
+wdi_indicators:
+  income:
+    - code: NY.GDP.PCAP.PP.KD
+      name: GDP per capita, PPP (constant 2021 international $)
+      coverage: all_six
+  investment:
+    - code: NE.GDI.FTOT.ZS
+      name: Gross fixed capital formation (% of GDP)
+      coverage: all_six
+    - code: BX.KLT.DINV.WD.GD.ZS
+      name: FDI net inflows (% of GDP)
+      coverage: all_six
+  productivity:
+    - code: SL.GDP.PCAP.EM.KD
+      name: GDP per person employed (constant 2021 PPP $)
+      coverage: five_country     # Kosovo NONE; exclude from 6-country sigma
+  trade:
+    - code: NE.TRD.GNFS.ZS
+      name: Trade (% of GDP)
+      coverage: all_six
+  labour:
+    # NATIONAL estimates, not modeled-ILO: modeled is empty for Kosovo.
+    - code: SL.TLF.CACT.NE.ZS
+      name: Labour force participation rate (national estimate)
+      coverage: all_six
+    - code: SL.UEM.TOTL.NE.ZS
+      name: Unemployment, total (national estimate)
+      coverage: all_six
+    - code: SL.UEM.1524.NE.ZS
+      name: Youth unemployment (national estimate)
+      coverage: all_six
+
+# WGI database (source=3). NOT reachable via wbgapi - fetch via raw requests.
+# 2025 revision: old *.PER.RNK codes are dead; these are absolute 0-100 scores.
+# Governance is DESCRIPTIVE only: own axis, no gap-to-EU / years-to-close / sigma.
+wgi_indicators:
+  source: 3
+  fetch: raw_requests
+  scale: absolute_score_0_100
+  role: descriptive_only
+  indicators:
+    - code: GOV_WGI_RL.SC
+      name: Rule of Law (score 0-100)
+    - code: GOV_WGI_CC.SC
+      name: Control of Corruption (score 0-100)
+    - code: GOV_WGI_GE.SC
+      name: Government Effectiveness (score 0-100)
