@@ -21,12 +21,13 @@ def get_window(cfg: dict) -> tuple[int, int]:
 
 
 def get_countries(cfg: dict) -> list[str]:
-    """All economies to pull: the six WB + EU aggregate + comparators."""
+    """All economies to pull: six WB + EU aggregate + comparators + success case."""
     c = cfg["countries"]
     six = c["western_balkans"]
     eu = [c["benchmarks"]["eu_aggregate"]]
     comparators = c["benchmarks"]["comparators"]
-    return six + eu + comparators
+    success = c["benchmarks"].get("regional_success_case", [])
+    return six + eu + comparators + success
 
 
 def get_wdi_indicators(cfg: dict) -> list[dict]:

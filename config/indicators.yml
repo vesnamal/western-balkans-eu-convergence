@@ -28,7 +28,9 @@ countries:
       - HRV  # Croatia
       - BGR  # Bulgaria
       - ROU  # Romania
-
+    regional_success_case: # ex-Yugoslav republic that completed convergence + EU/eurozone.
+      - SVN  # Slovenia — "the one of us who made it". VERIFIED 17/17. Own narrative axis.
+   
 # WDI database (wbgapi default, db=2). Fetched via wbgapi.
 wdi_indicators:
   income:
