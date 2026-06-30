@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: wb_raw
+    schema: s_vesnamalenica
+    description: "Append-only raw layer landed by the Python ingestion scripts."
+    tables:
+      - name: wb_raw_wdi
+        description: "Raw World Bank WDI indicators, long format. Nulls kept as coverage info."
+      - name: wb_raw_wgi
+        description: "Raw World Bank WGI governance scores, long format."
