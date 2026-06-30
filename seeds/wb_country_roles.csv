@@ -1,0 +1,35 @@
+country_iso3,country_name,role,ex_yugoslav,eu_member
+ALB,Albania,western_balkan,false,false
+BIH,Bosnia and Herzegovina,western_balkan,true,false
+XKX,Kosovo,western_balkan,true,false
+MNE,Montenegro,western_balkan,true,false
+MKD,North Macedonia,western_balkan,true,false
+SRB,Serbia,western_balkan,true,false
+HRV,Croatia,recent_entrant,true,true
+BGR,Bulgaria,recent_entrant,false,true
+ROU,Romania,recent_entrant,false,true
+SVN,Slovenia,success_case,true,true
+EUU,European Union (aggregate),eu_benchmark,false,false
+AUT,Austria,eu_core,false,true
+BEL,Belgium,eu_core,false,true
+CYP,Cyprus,eu_core,false,true
+CZE,Czechia,eu_core,false,true
+DEU,Germany,eu_core,false,true
+DNK,Denmark,eu_core,false,true
+ESP,Spain,eu_core,false,true
+EST,Estonia,eu_core,false,true
+FIN,Finland,eu_core,false,true
+FRA,France,eu_core,false,true
+GRC,Greece,eu_core,false,true
+HUN,Hungary,eu_core,false,true
+IRL,Ireland,eu_core,false,true
+ITA,Italy,eu_core,false,true
+LTU,Lithuania,eu_core,false,true
+LUX,Luxembourg,eu_core,false,true
+LVA,Latvia,eu_core,false,true
+MLT,Malta,eu_core,false,true
+NLD,Netherlands,eu_core,false,true
+POL,Poland,eu_core,false,true
+PRT,Portugal,eu_core,false,true
+SVK,Slovakia,eu_core,false,true
+SWE,Sweden,eu_core,false,true
