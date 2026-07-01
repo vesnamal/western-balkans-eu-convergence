@@ -2,7 +2,7 @@
 
 A reproducible ELT pipeline measuring real economic convergence of the six Western Balkan economies toward the EU, and identifying where each is stuck.
 
-Status: Sprint 1 in progress. Raw ingestion layer complete and verified across both sources at the full 34-entity country set (World Bank WDI + WGI landed in PostgreSQL). dbt Cloud connected to the RDS, project initialized and configured. Staging models next.
+Status: Pipeline built end-to-end and producing results. Raw ingestion (WDI + WGI, 34 entities) landed in PostgreSQL and verified; dbt staging, intermediate, and the first mart models (`wb_fct_gap_to_eu`, `wb_fct_stuck_matrix`) built and tested in `s_vesnamalenica`; analysis notebook (`notebooks/01_analysis.ipynb`) produces the convergence findings and visualizations. Remaining work: additional KPI marts (sigma-convergence, years-to-close), a governance descriptive view, and the Tableau dashboard.
 
 ## Question
 
@@ -31,7 +31,7 @@ Kosovo (XKX) is asymmetric: thin on economics (productivity entirely absent → 
 
 ## Analysis window
 
-2008–2024, common across all six (Kosovo data begins ~2008). See notebook Step 2.
+2008–2024, common across all six (Kosovo data begins ~2008). See the notebook's scope section.
 
 ## Stack
 
@@ -40,16 +40,17 @@ Python (ingestion) → PostgreSQL (raw/staging/marts) → dbt (transform + tests
 ## Repo layout
 
     config/          indicators.yml — single source of truth
-    ingestion/       per-source Python (Sprint 1)
-    models/          dbt: staging / intermediate / marts (Sprint 1+)
+    ingestion/       per-source Python ingestion (WDI, WGI)
+    models/          dbt: staging / intermediate / marts
     macros/          dbt: generate_schema_name guardrail + helpers
+    seeds/           dbt: reference CSVs (country roles, indicator meta)
     dbt_project.yml  dbt project config (root-level)
-    sql/             raw schema + coverage checks
-    tableau/         packaged workbook
-    docs/            proposal, methodology, limitations
-    notebooks/       verification & exploration
+    sql/             raw schema DDL + coverage checks
+    docs/            data_dictionary.md
+    notebooks/       00_verify_codes (indicator verification), 01_analysis (findings)
+    tableau/         packaged workbook (in progress)
 
-The dbt project is initialized at the repo root (not in a subdirectory). All models use a `wb_` name prefix for collision-safety in the shared course schema; a `generate_schema_name` macro override forces all output into the single target schema `s_vesnamalenica` (no CREATE SCHEMA rights on the shared RDS).
+The dbt project is initialized at the repo root (not in a subdirectory). All models use a `wb_` name prefix for collision-safety in the shared course schema; a `generate_schema_name` macro override forces all output into the single target schema `s_vesnamalenica`.
 
 ## Setup
 
@@ -57,7 +58,17 @@ The dbt project is initialized at the repo root (not in a subdirectory). All mod
 2. Copy `.env.example` to `.env` and fill in PostgreSQL credentials (`.env` is gitignored).
 3. Create the raw tables: run `sql/raw_ddl.sql` against the database once.
 4. Land the raw data: `python ingestion/pull_wdi.py` then `python ingestion/pull_wgi.py`.
-5. (dbt transform + Tableau steps — to come.)
+5. Build the dbt models: from the project root, `dbt seed` (loads the reference CSVs), then `dbt build` (runs and tests staging → intermediate → marts). Output lands in schema `s_vesnamalenica`.
+6. Run the analysis: open `notebooks/01_analysis.ipynb` and run all cells. It reads the marts directly from the database and produces the findings and charts.
+
+## Reproducibility notes
+
+This is an open-data pipeline — every source is publicly accessible via API — but a few things a re-runner needs are, by design, not in the repo:
+
+* **Database.** Development used a shared course PostgreSQL instance. Access to that instance is temporary; to reproduce independently, point `.env` at any PostgreSQL database (local or hosted). The pipeline is warehouse-agnostic PostgreSQL — no instance-specific features are used.
+* **Credentials.** `.env` (database connection) is gitignored and never committed. Use `.env.example` as the template.
+* **dbt.** Models were developed in dbt Cloud, but the project is standard dbt and runs identically under dbt Core (`dbt build` from the repo root) against any connected PostgreSQL — dbt Cloud is not required to reproduce the transformations.
+* **Source APIs.** Ingestion depends on the World Bank WDI/WGI APIs being reachable at run time. The frozen indicator basket (`config/indicators.yml`) fixes *what* is pulled; the APIs supply the values.
 
 ## Key methodology notes
 
