@@ -141,9 +141,9 @@ One row per country-indicator-year. Computes each entity's value as a percentage
 | `gap_to_eu` | numeric | `value / eu_value × 100`, rounded to 2dp. Null if benchmark missing/zero. EUU rows = 100 by construction. |
 
 ### `wb_fct_stuck_matrix` — convergence status classification
-One row per country-indicator. Classifies movement in `gap_to_eu` over 2014-2024 as `catching_up` / `stuck` / `falling_behind` / `no_data`.
-Threshold: ±2 points over the decade (documented choice, tunable).
-Bucket-aware: `convergence`/`context` treat rising gap as catch-up; `context_inverted` (unemployment) is **flipped** — a falling gap toward EU is catch-up. Null in either year: `no_data` (no forced classification).
+One row per country-indicator. Classifies movement in `gap_to_eu` over 2014-2024 as `catching_up` / `stuck` / `falling_behind` / `not_classified` / `no_data`.
+Threshold: ±2 points over the decade (a coarse deadband for near-zero movement, not a convergence-speed measure; rigorous rate/dispersion analysis is deferred to the beta/sigma marts).
+**Classification is scoped by bucket.** Only buckets where movement toward the EU is unambiguously convergence are classified: `convergence` (rising gap toward EU = catch-up) and `context_inverted` (unemployment; **flipped** — falling gap toward EU = catch-up). Plain `context` indicators (investment, trade, labour participation) are **retained but not classified** (`not_classified`): the EU average is not a defensible target for a catch-up economy, so distance-from-100 has no clean convergence reading. Null in either year: `no_data` (no forced classification).
 
 | Column | Type | Description |
 |---|---|---|
@@ -158,7 +158,7 @@ Bucket-aware: `convergence`/`context` treat rising gap as catch-up; `context_inv
 | `gap_2014` | numeric | Gap-to-EU in 2014. |
 | `gap_2024` | numeric | Gap-to-EU in 2024. |
 | `gap_change` | numeric | `gap_2024 − gap_2014` (points). |
-| `status` | text | `catching_up` / `stuck` / `falling_behind` / `no_data`. |
+| `status` | text | `catching_up` / `stuck` / `falling_behind` / `no_data` for classified buckets (`convergence`, `context_inverted`); `not_classified` for plain `context` indicators. |
 
 ---
 
