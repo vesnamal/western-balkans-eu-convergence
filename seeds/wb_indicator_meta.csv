@@ -1,0 +1,9 @@
+indicator_code,friendly_name,bucket
+NY.GDP.PCAP.PP.KD,GDP per capita PPP,convergence
+SL.GDP.PCAP.EM.KD,Productivity (GDP per worker),convergence
+NE.GDI.FTOT.ZS,Gross fixed capital formation (% GDP),context
+BX.KLT.DINV.WD.GD.ZS,FDI net inflows (% GDP),context
+NE.TRD.GNFS.ZS,Trade (% GDP),context
+SL.TLF.CACT.NE.ZS,Labour force participation (%),context
+SL.UEM.TOTL.NE.ZS,Unemployment total (%),context_inverted
+SL.UEM.1524.NE.ZS,Youth unemployment (%),context_inverted
