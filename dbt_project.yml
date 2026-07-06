@@ -17,6 +17,14 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+vars:
+  # Single source of truth for the years-to-close reference year. Referenced
+  # in wb_fct_years_to_close via {{ var('years_to_close_reference_year') }}
+  # instead of a bare literal, so a future re-pull only needs one line changed
+  # here rather than a hunt through mart SQL. See that model's header comment
+  # for why 2024 was hardcoded rather than computed dynamically.
+  years_to_close_reference_year: 2024
+
 models:
   western_balkans:
     +materialized: view
