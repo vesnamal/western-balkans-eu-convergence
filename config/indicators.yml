@@ -1,6 +1,6 @@
 # config/indicators.yml
 # Single source of truth for the WB-EU convergence pipeline.
-# Frozen in Sprint 0, verified against the live World Bank API (2026-06-26).
+# Frozen, verified against the live World Bank API (2026-06-26).
 # Adding an indicator = add one entry under the right block.
 
 project:
@@ -21,9 +21,9 @@ countries:
     - SRB   # Serbia
   benchmarks:
     eu_aggregate: EUU      # VERIFIED on live API, 17/17 yrs. "European Union" aggregate.
-    # CAVEAT: EUU likely tracks CURRENT membership (27 now, 28 pre-2020 UK exit) ->
+    # CAVEAT: EUU likely tracks CURRENT membership (27 now, 28 pre-2020 UK exit)
     #   possible structural break ~2020. Proposal benchmark is EU27 (fixed-definition).
-    #   DECIDE in Sprint 1: WB EUU as headline vs Eurostat EU27=100 (cross-validation).
+    #   DECIDE later: WB EUU as headline vs Eurostat EU27=100 (cross-validation).
     comparators:           # recent EU entrants: "the path the WB might follow". VERIFIED 17/17.
       - HRV  # Croatia
       - BGR  # Bulgaria
@@ -32,7 +32,7 @@ countries:
       - SVN  # Slovenia — "the one of us who made it". VERIFIED 17/17. Own narrative axis.
   eu_members:            # full EU-27 backdrop (the 23 not already listed above).
     # Comparator/distribution context only; NOT part of the 6-country sigma.
-    # HRV, BGR, ROU, SVN are intentionally absent here — already under
+    # HRV, BGR, ROU, SVN are intentionally absent here, already under
     # benchmarks (comparators / regional_success_case). The eu_member=true
     # flag for all 27 is applied in the dbt country dimension, not here.
     - AUT  # Austria
@@ -92,7 +92,7 @@ wdi_indicators:
       name: Youth unemployment (national estimate)
       coverage: all_six
 
-# WGI database (source=3). NOT reachable via wbgapi - fetch via raw requests.
+# WGI database (source=3). NOT reachable via wbgapi, fetch via raw requests.
 # 2025 revision: old *.PER.RNK codes are dead; these are absolute 0-100 scores.
 # Governance is DESCRIPTIVE only: own axis, no gap-to-EU / years-to-close / sigma.
 wgi_indicators:
