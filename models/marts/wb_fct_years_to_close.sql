@@ -18,6 +18,31 @@
 --   NULL slope (missing data, e.g. Kosovo productivity) -> 'no_data', checked
 --   before any threshold comparison, since NULL comparisons are neither true
 --   nor false and would otherwise silently fall through to a wrong category.
+--   
+-- CLOSURE_STATUS -- a separate fact from trajectory 'status', not a
+-- replacement. A country's slope (improving/flat/worsening) and its
+-- current position relative to 100 (already at/past the EU benchmark
+-- or not) are independent measurements and can disagree. Concretely:
+-- Romania's total unemployment is 'diverging' (rising, worsening trend)
+-- AND 'already_closed' (91.64, currently better than the EU average) --
+-- both true at once, neither cancels the other.
+--
+-- years_to_close = 0 for EVERY already_closed row, with no exception for
+-- diverging/stalled trajectories. Rationale: this column answers "how
+-- long until the gap closes," and for an already-closed gap that answer
+-- is 0 regardless of trend -- trend is status's job, not this column's.
+-- Nulling years_to_close for diverging-but-closed rows was considered
+-- and rejected: it would make NULL mean two different things (still-open
+-- non-closing case vs. closed-but-worsening case) depending on context,
+-- indistinguishable without checking status anyway -- no real gain over
+-- showing 0 and requiring the pairing below.
+--
+-- DISPLAY REQUIREMENT, not optional: status and closure_status must
+-- always be shown together wherever years_to_close appears. Shown alone,
+-- "0 years, already closed" reads as an all-clear and hides that the
+-- advantage may be shrinking. This is not hypothetical -- Romania's row
+-- is the live case that would be misread today if either column were
+-- dropped from a chart for cleanliness.
 --
 -- DEADBANDS ARE ASYMMETRIC ACROSS BUCKETS -- deliberate deviation from
 -- stuck-matrix's single ±2pt/decade rule, not an oversight:
@@ -106,10 +131,49 @@ classified as (
             else 'not_classified'
         end as status
     from slopes
+),
+with_gap as (
+    -- Reference year comes from vars.years_to_close_reference_year
+    -- (dbt_project.yml), currently set to 2024. Verified fully populated
+    -- for these four indicators except Kosovo productivity (already null
+    -- via slope -- see header comment above). If a future re-pull adds a
+    -- new year, bump the var in one place rather than hunting this file.
+    select
+        c.*,
+        g.gap_to_eu as gap_2024
+    from classified c
+    left join {{ ref('wb_fct_gap_to_eu') }} g
+        on c.country_iso3 = g.country_iso3
+        and c.indicator_code = g.indicator_code
+        and g.year = {{ var('years_to_close_reference_year') }}
+),
+final as (
+    select
+        *,
+        -- closure_status is a SEPARATE fact from trajectory 'status':
+        -- a country can be improving (catching_up) while already ahead of
+        -- the EU benchmark on this measure (found live: Croatia, Bulgaria,
+        -- Slovenia on unemployment). 'status' stays untouched -- this adds
+        -- a second lens, not a replacement.
+        case
+            when bucket = 'convergence' and gap_2024 >= 100 then 'already_closed'
+            when bucket = 'context_inverted' and gap_2024 <= 100 then 'already_closed'
+            else status
+        end as closure_status,
+        case
+            when status = 'no_data' then null
+            when gap_2024 is null then null  -- defensive: see comment above
+            when bucket = 'convergence' and gap_2024 >= 100 then 0
+            when bucket = 'context_inverted' and gap_2024 <= 100 then 0
+            when status != 'catching_up' then null  -- stalled/diverging have no honest years figure
+            when bucket = 'convergence' then round(((100 - gap_2024) / slope_per_year)::numeric, 1)
+            when bucket = 'context_inverted' then round(((gap_2024 - 100) / abs(slope_per_year))::numeric, 1)
+        end as years_to_close
+    from with_gap
 )
 select
     country_iso3, country_name, role, ex_yugoslav, eu_member,
     indicator_code, friendly_name, bucket,
-    n_points, slope_per_year, intercept, status
-from classified
+    n_points, slope_per_year, intercept, status, closure_status, gap_2024, years_to_close
+from final
 order by role, country_name, indicator_code
