@@ -7,3 +7,6 @@ NE.TRD.GNFS.ZS,Trade (% GDP),context
 SL.TLF.CACT.NE.ZS,Labour force participation (%),context
 SL.UEM.TOTL.NE.ZS,Unemployment total (%),context_inverted
 SL.UEM.1524.NE.ZS,Youth unemployment (%),context_inverted
+GOV_WGI_RL.SC,Rule of Law,governance
+GOV_WGI_CC.SC,Control of Corruption,governance
+GOV_WGI_GE.SC,Government Effectiveness,governance
