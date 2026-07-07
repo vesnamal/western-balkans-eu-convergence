@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: wb_fct_governance
+    description: >
+      Descriptive governance panel: the three WGI scores (Rule of Law,
+      Control of Corruption, Government Effectiveness) for the WB-six plus
+      comparator tiers, 2014-2024, long grain. Descriptive only -- no
+      convergence machinery applies (WGI is standardised 0-100, not
+      ratio-scaled). Grain: one row per country_iso3 x indicator_code x year.
+    columns:
+      - name: country_iso3
+        data_tests:
+          - not_null
+      - name: country_name
+        data_tests:
+          - not_null
+      - name: role
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['western_balkan', 'success_case', 'recent_entrant']
+      - name: indicator_code
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['GOV_WGI_RL.SC', 'GOV_WGI_CC.SC', 'GOV_WGI_GE.SC']
+      - name: friendly_name
+        data_tests:
+          - not_null
+      - name: bucket
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['governance']
+      - name: year
+        data_tests:
+          - not_null
+      - name: value
+        data_tests:
+          - not_null
