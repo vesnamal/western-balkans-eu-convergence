@@ -5,7 +5,7 @@
 
 project:
   analysis_window:
-    start: 2008          # common window; Kosovo economic data begins ~2008
+    start: 2008          # common window; earliest year with broad WB coverage
     end: 2024
   notes: >
     Common 2008-2024 window across all six. Window opens on the 2008-09 GFC;
@@ -15,15 +15,20 @@ countries:
   western_balkans:
     - ALB   # Albania
     - BIH   # Bosnia and Herzegovina
-    - XKX   # Kosovo (late start 2008; absent on productivity)
+    - XKX   # Kosovo: absent on productivity (17/17 null); youth unemployment begins 2012
     - MNE   # Montenegro
     - MKD   # North Macedonia
     - SRB   # Serbia
   benchmarks:
     eu_aggregate: EUU      # VERIFIED on live API, 17/17 yrs. "European Union" aggregate.
-    # CAVEAT: EUU likely tracks CURRENT membership (27 now, 28 pre-2020 UK exit)
-    #   possible structural break ~2020. Proposal benchmark is EU27 (fixed-definition).
-    #   DECIDE later: WB EUU as headline vs Eurostat EU27=100 (cross-validation).
+    # DECIDED: WB EUU is the headline benchmark. EUU tracks current membership
+    #   (27 now, 28 pre-2020 UK exit), so a structural break at the UK's exit
+    #   was a live concern. Checked and ruled out: inspection of the EUU series
+    #   2016-2024 shows no persistent level shift on any of the four indicators
+    #   used in the convergence metrics (GDP per capita, productivity, total and
+    #   youth unemployment) -- each shows a 2020 COVID dip that fully recovers by
+    #   2021. A Eurostat EU27=100 cross-check would additionally rule out gradual
+    #   compositional drift; not done, documented as a limitation.
     comparators:           # recent EU entrants: "the path the WB might follow". VERIFIED 17/17.
       - HRV  # Croatia
       - BGR  # Bulgaria
@@ -75,7 +80,10 @@ wdi_indicators:
   productivity:
     - code: SL.GDP.PCAP.EM.KD
       name: GDP per person employed (constant 2021 PPP $)
-      coverage: five_country     # Kosovo NONE; exclude from 6-country sigma
+      coverage: five_country     # Kosovo NONE (17/17 null). Not filtered out anywhere:
+                                 # SQL aggregates skip nulls, so sigma computes over 5
+                                 # countries with no hardcoded exclusion. n_countries
+                                 # in wb_fct_sigma_convergence is the audit trail.
   trade:
     - code: NE.TRD.GNFS.ZS
       name: Trade (% of GDP)
