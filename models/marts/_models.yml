@@ -39,3 +39,233 @@ models:
       - name: value
         data_tests:
           - not_null
+
+  - name: wb_fct_gap_to_eu
+    description: >
+      Gap-to-EU fact table. Grain: one row per country_iso3 x indicator_code
+      x year. gap_to_eu = country value as % of the EUU benchmark
+      (WB-derived; Eurostat cross-check deferred). bucket 'convergence' is
+      true catch-up; 'context' and 'context_inverted' are descriptive only
+      (latter: lower is better). Known nulls in value/gap_to_eu within the
+      2014-2024 study window: Kosovo (XKX) has no data for SL.GDP.PCAP.EM.KD
+      (productivity), all 11 years -- this is the documented Kosovo
+      asymmetry, not a data quality issue. Columns ex_yugoslav, eu_member and
+      eu_value are deliberately untested: the first two are label-only fields
+      and eu_value is covered indirectly (gap_to_eu is null exactly when
+      eu_value is null or zero).
+    columns:
+      - name: country_iso3
+        data_tests:
+          - not_null
+      - name: country_name
+        data_tests:
+          - not_null
+      - name: role
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['western_balkan', 'success_case', 'recent_entrant', 'eu_core', 'eu_benchmark']
+      - name: indicator_code
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'BX.KLT.DINV.WD.GD.ZS'
+                - 'NE.GDI.FTOT.ZS'
+                - 'NE.TRD.GNFS.ZS'
+                - 'SL.TLF.CACT.NE.ZS'
+                - 'SL.UEM.1524.NE.ZS'
+                - 'SL.UEM.TOTL.NE.ZS'
+                - 'NY.GDP.PCAP.PP.KD'
+                - 'SL.GDP.PCAP.EM.KD'
+      - name: friendly_name
+        data_tests:
+          - not_null
+      - name: bucket
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['convergence', 'context', 'context_inverted']
+      - name: year
+        data_tests:
+          - not_null
+
+  - name: wb_fct_stuck_matrix
+    description: >
+      Stuck-matrix classification. Grain: one row per country_iso3 x
+      indicator_code (no year dimension) -- 34 countries x 8 indicators =
+      272 rows. Each row classifies a country-indicator over 2014-2024 using
+      the OLS slope of gap_to_eu (regr_slope), not endpoint delta. Deadbands:
+      +/-0.2 pts/year for bucket 'convergence', +/-2.0 pts/year for
+      'context_inverted' (unemployment slopes are ~6x larger on average --
+      mean absolute slope 5.54 vs 0.91 pts/year -- and never fall below
+      0.46, so a +/-0.2 deadband would classify zero rows as stuck). Plain
+      'context' indicators are never classified -- EU average is not a
+      defensible target for a catch-up economy -- and always carry status
+      'not_classified' (136 rows). status 'no_data' occurs exactly once:
+      Kosovo (XKX) x SL.GDP.PCAP.EM.KD, where all 11 years of gap_to_eu are
+      null so regr_slope returns null. That single row is the only source of
+      nulls in slope_per_year, gap_2014, gap_2024 and gap_change, which are
+      therefore deliberately not not_null-tested; the singular test guards
+      them instead.
+    columns:
+      - name: country_iso3
+        data_tests:
+          - not_null
+      - name: country_name
+        data_tests:
+          - not_null
+      - name: role
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['western_balkan', 'success_case', 'recent_entrant', 'eu_core', 'eu_benchmark']
+      - name: indicator_code
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'BX.KLT.DINV.WD.GD.ZS'
+                - 'NE.GDI.FTOT.ZS'
+                - 'NE.TRD.GNFS.ZS'
+                - 'SL.TLF.CACT.NE.ZS'
+                - 'SL.UEM.1524.NE.ZS'
+                - 'SL.UEM.TOTL.NE.ZS'
+                - 'NY.GDP.PCAP.PP.KD'
+                - 'SL.GDP.PCAP.EM.KD'
+      - name: friendly_name
+        data_tests:
+          - not_null
+      - name: bucket
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['convergence', 'context', 'context_inverted']
+      - name: status
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['catching_up', 'falling_behind', 'stuck', 'not_classified', 'no_data']
+
+  - name: wb_fct_sigma_convergence
+    description: >
+      Sigma-convergence: cross-country dispersion of gap_to_eu across the six
+      Western Balkan economies, per indicator per year. Grain: one row per
+      indicator_code x year -- 4 indicators x 11 years (2014-2024) = 44 rows.
+      Measure is the coefficient of variation (cv_gap = sd_gap / mean_gap),
+      scale-free so it does not shrink merely because the mean level rises.
+      Reported as a descriptive trend, never as a significance test: at n=6
+      (n=5 for productivity) p-values are not defensible. Scope matches the
+      stuck-matrix inclusion rule (convergence + context_inverted buckets).
+      Kosovo is never filtered out -- its productivity gap_to_eu rows are null,
+      so SQL aggregates skip them and n_countries reads 5 on
+      SL.GDP.PCAP.EM.KD and 6 on the other three. Verified: the panel is
+      balanced, n_countries has min = max for every indicator, and no nulls
+      exist in n_countries, mean_gap, sd_gap or cv_gap.
+    columns:
+      - name: indicator_code
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'NY.GDP.PCAP.PP.KD'
+                - 'SL.GDP.PCAP.EM.KD'
+                - 'SL.UEM.TOTL.NE.ZS'
+                - 'SL.UEM.1524.NE.ZS'
+      - name: year
+        data_tests:
+          - not_null
+      - name: n_countries
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [5, 6]
+              quote: false
+      - name: mean_gap
+        data_tests:
+          - not_null
+      - name: sd_gap
+        data_tests:
+          - not_null
+      - name: cv_gap
+        data_tests:
+          - not_null
+
+  - name: wb_fct_years_to_close
+    description: >
+      Constant-rate extrapolation of the years needed to close each country's
+      gap_to_eu, from the OLS slope over 2014-2024 (regr_slope, 11 points).
+      Explicitly NOT a forecast: convergence decelerates near the EU frontier
+      and n=6 cannot support prediction intervals. Grain: one row per
+      country_iso3 x indicator_code -- 10 countries (WB six + Slovenia +
+      Bulgaria/Croatia/Romania) x 4 indicators (convergence +
+      context_inverted buckets only) = 40 rows. Deadbands are asymmetric by
+      bucket: +/-0.2 pts/year for 'convergence', +/-2.0 pts/year for
+      'context_inverted', because unemployment slopes are ~6x larger on
+      average (mean absolute slope 5.54 vs 0.91 pts/year) and never fall
+      below 0.46, so a +/-0.2 deadband would classify zero rows as stalled.
+      The threshold was picked by inspecting the observed slope distribution,
+      not derived theoretically.
+
+      closure_status is NOT a clean categorical: it returns 'already_closed'
+      when the 2024 gap has passed the EU benchmark, and otherwise echoes
+      'status' verbatim. Four of its five observed values are therefore
+      identical to status. It is a second lens on the same row, not an
+      independent dimension, and status + closure_status must always be
+      displayed together wherever years_to_close appears -- Romania's total
+      unemployment is simultaneously 'diverging' (worsening) and
+      'already_closed' (better than the EU average), and dropping either
+      column makes the row read as an all-clear.
+
+      Nulls, all verified: slope_per_year, intercept and gap_2024 are null
+      only on Kosovo (XKX) x SL.GDP.PCAP.EM.KD, where n_points = 0 and status
+      = 'no_data'. years_to_close is additionally null for stalled and
+      diverging rows (7 null rows in total), because no honest years figure
+      exists for a gap that is not closing. status value 'not_classified'
+      never occurs -- the model's else branch is an unreachable fail-safe
+      given the bucket scope filter.
+    columns:
+      - name: country_iso3
+        data_tests:
+          - not_null
+      - name: country_name
+        data_tests:
+          - not_null
+      - name: role
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['western_balkan', 'success_case', 'recent_entrant']
+      - name: indicator_code
+        data_tests:
+          - not_null
+          - accepted_values:
+              values:
+                - 'NY.GDP.PCAP.PP.KD'
+                - 'SL.GDP.PCAP.EM.KD'
+                - 'SL.UEM.TOTL.NE.ZS'
+                - 'SL.UEM.1524.NE.ZS'
+      - name: friendly_name
+        data_tests:
+          - not_null
+      - name: bucket
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['convergence', 'context_inverted']
+      - name: n_points
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [0, 11]
+              quote: false
+      - name: status
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['catching_up', 'diverging', 'stalled', 'no_data']
+      - name: closure_status
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['already_closed', 'catching_up', 'diverging', 'stalled', 'no_data']

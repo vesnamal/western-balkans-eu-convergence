@@ -37,8 +37,12 @@
 --   sigma-convergence result and the group-level echo of the country-level
 --   "all six catching up on GDP" finding.
 --
--- Productivity (5-country): CV falls 0.187 -> 0.151 (~19%). 
---   -- it is NOT the same claim as GDP, and it looks like it contradicts the
+-- Productivity (5-country): CV falls 0.187 -> 0.151 (~19%) on endpoints, but
+--   the path is NOT monotonic -- it peaks at 0.203 mid-window, above its own
+--   2014 starting value, before the sustained decline from 2022. Quote the
+--   endpoints only alongside the peak.
+--
+--   This is NOT the same claim as GDP, and it appears to contradict the
 --   locked "productivity gaps barely move" finding but does not. That finding is
 --   about the MEAN gap, which crawls only +3.2 pts (45.9 -> 49.1). Sigma is about
 --   the SPREAD, which shrinks. Correct reading: the five economies are converging
@@ -47,8 +51,9 @@
 --   the finding sigma adds that nothing else in the project shows.
 --
 -- Total unemployment (6-country): CV falls 0.290 -> 0.190 but NON-MONOTONIC --
---   peaks 0.353 in 2020 (COVID), then drops. Trend is down but noisy; any
---   "converging" claim must carry the noise caveat.
+--   peaks 0.353 in 2020 (COVID), bottoms at 0.167 in 2023, then REBOUNDS to
+--   0.190 in 2024. Trend is down but noisy and currently worsening; any
+--   "converging" claim must carry the noise caveat AND the 2024 uptick.
 --
 -- Youth unemployment (6-country): CV falls 0.219 -> 0.159, also non-monotonic
 --   (peaks 0.279 in 2018). Same noise caveat.
