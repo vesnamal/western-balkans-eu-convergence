@@ -1,0 +1,63 @@
+version: 2
+
+seeds:
+  - name: wb_country_roles
+    description: >
+      Country dimension reference. 34 rows, one per entity in the analysis:
+      6 Western Balkan candidates, 3 recent EU entrants (Bulgaria, Croatia,
+      Romania), 1 regional success case (Slovenia), 23 remaining EU-27
+      members as a distributional backdrop, and 1 EU aggregate row (EUU)
+      used as the gap-to-EU benchmark denominator. role is the discriminator
+      used for all country-set filtering. eu_member is a boolean that reads
+      false for BOTH the EU aggregate row and the six Western Balkan rows,
+      so it cannot distinguish them -- it is label text only, never a filter.
+    columns:
+      - name: country_iso3
+        description: ISO 3166-1 alpha-3 code. Kosovo uses XKX (World Bank convention).
+        data_tests:
+          - not_null
+          - unique
+      - name: country_name
+        data_tests:
+          - not_null
+      - name: role
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['western_balkan', 'success_case', 'recent_entrant', 'eu_core', 'eu_benchmark']
+      - name: ex_yugoslav
+        description: >
+          True for BIH, XKX, MNE, MKD, SRB, HRV, SVN. Albania is NOT
+          ex-Yugoslav and must be labelled separately wherever this flag
+          is used for grouping.
+        data_tests:
+          - not_null
+      - name: eu_member
+        data_tests:
+          - not_null
+
+  - name: wb_indicator_meta
+    description: >
+      Indicator dimension reference. 11 rows: 8 WDI economic indicators and
+      3 WGI governance scores. bucket determines how each indicator is
+      treated downstream -- 'convergence' indicators are true catch-up
+      measures (higher gap_to_eu is better); 'context_inverted' are
+      unemployment measures (lower is better); plain 'context' indicators
+      are descriptive only and are never classified in the stuck-matrix,
+      because the EU average is not a defensible target for them;
+      'governance' is descriptive only and no convergence machinery applies
+      (WGI scores are standardised 0-100, not ratio-scaled).
+      Bucket counts: context 4, convergence 2, context_inverted 2, governance 3.
+    columns:
+      - name: indicator_code
+        data_tests:
+          - not_null
+          - unique
+      - name: friendly_name
+        data_tests:
+          - not_null
+      - name: bucket
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['convergence', 'context', 'context_inverted', 'governance']
