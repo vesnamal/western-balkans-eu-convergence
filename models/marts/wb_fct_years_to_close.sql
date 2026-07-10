@@ -1,6 +1,6 @@
 -- wb_fct_years_to_close: OLS slope of gap_to_eu over 2014-2024 (11 points),
 -- scoped to convergence + context_inverted buckets (mirrors stuck_matrix's
--- B-nuanced scoping). Role scope widened beyond the WB six to include
+-- scoping). Role scope widened beyond the WB six to include
 -- comparator tier (Slovenia=success_case, Bulgaria/Croatia/Romania=recent_entrant)
 -- for Tableau reference display -- NOT the EU aggregate, NOT eu_core states,
 -- NOT plain 'context' bucket (no defensible EU target for those indicators).
@@ -19,10 +19,13 @@
 --   before any threshold comparison, since NULL comparisons are neither true
 --   nor false and would otherwise silently fall through to a wrong category.
 --   
--- CLOSURE_STATUS -- a separate fact from trajectory 'status', not a
--- replacement. A country's slope (improving/flat/worsening) and its
--- current position relative to 100 (already at/past the EU benchmark
--- or not) are independent measurements and can disagree. Concretely:
+-- CLOSURE_STATUS -- adds one fact that 'status' cannot express: whether the
+-- gap has already been crossed. It is NOT an independent categorical: when
+-- the gap is not yet closed it echoes 'status' verbatim (the else branch),
+-- so 4 of its 5 observed values are identical to status. Only
+-- 'already_closed' is new information. Trajectory (improving/flat/worsening)
+-- and position relative to 100 are independent measurements and can
+-- disagree, which is the whole point. Concretely:
 -- Romania's total unemployment is 'diverging' (rising, worsening trend)
 -- AND 'already_closed' (91.64, currently better than the EU average) --
 -- both true at once, neither cancels the other.
@@ -48,10 +51,10 @@
 -- stuck-matrix's single ±2pt/decade rule, not an oversight:
 --   convergence:       ±0.2 pts/year (= stuck-matrix's ±2pt/decade, unit-converted)
 --   context_inverted:  ±2.0 pts/year -- empirically, unemployment-index slopes
---                       run 5-15x larger in magnitude than GDP/productivity
---                       slopes (structurally more volatile indicator); ±0.2
---                       produced zero 'stalled' cases across all 20 rows tested
---                       and was judged non-functional for this bucket.
+--                       are ~6x larger in magnitude than GDP/productivity
+--                       slopes (mean |slope| 5.54 vs 0.91 pts/year) and never
+--                       fall below 0.46, so ±0.2 produces zero 'stalled' cases
+--                       in this bucket and is non-functional there.
 --   Threshold picked by inspecting the observed slope distribution, not
 --   derived theoretically -- a limitation to state plainly, not hide.
 --
@@ -66,11 +69,14 @@
 --     (checked directly). Independent modeled-ILO estimate cross-check attempted
 --     but blocked by site UI; not completed. Treat as a real but not fully
 --     externally corroborated finding.
---   - Montenegro unemployment (~+2 to +5, diverging): confirmed COVID-shock
---     pattern (spike 2019-2021, partial but incomplete recovery by 2024) --
---     structurally different from Montenegro's confirmed 2021 productivity
---     artifact (isolated spike-and-full-reversal). Diverging status is real,
---     not a repeat of the productivity data issue.
+--   - Montenegro unemployment (+2.00 youth, +5.21 total, both diverging):
+--     the youth slope clears the +/-2.0 deadband by 0.004 pts/year -- a
+--     knife-edge case that would reclassify to 'stalled' under a marginally
+--     wider band. Total unemployment is not sensitive (2.6x the threshold).
+--     Confirmed COVID-shock pattern (spike 2019-2021, partial but incomplete
+--     recovery by 2024) -- structurally different from Montenegro's confirmed
+--     2021 productivity artifact (isolated spike-and-full-reversal).
+--     Diverging status is real, not a repeat of the productivity data issue.
 --   - Romania unemployment (~+3.4 to +5.7, diverging): sustained non-reverting
 --     climb from 2020 onward, still rising through 2024. Checked against
 --     Bulgaria and Croatia (same recent_entrant tier) to rule out an EU-wide
@@ -150,11 +156,12 @@ with_gap as (
 final as (
     select
         *,
-        -- closure_status is a SEPARATE fact from trajectory 'status':
-        -- a country can be improving (catching_up) while already ahead of
-        -- the EU benchmark on this measure (found live: Croatia, Bulgaria,
-        -- Slovenia on unemployment). 'status' stays untouched -- this adds
-        -- a second lens, not a replacement.
+        -- closure_status answers a question 'status' cannot: has the gap
+        -- already been crossed? When it has not, this echoes 'status'
+        -- verbatim (see else) -- only 'already_closed' is new information.
+        -- Trajectory and position are independent and can disagree: found
+        -- live on Croatia, Bulgaria, Slovenia (unemployment), and Romania
+        -- (diverging AND already_closed). 'status' stays untouched.
         case
             when bucket = 'convergence' and gap_2024 >= 100 then 'already_closed'
             when bucket = 'context_inverted' and gap_2024 <= 100 then 'already_closed'
