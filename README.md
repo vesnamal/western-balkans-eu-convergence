@@ -33,7 +33,7 @@ Pipeline built end-to-end and producing verified results.
 - **Ingestion:** WDI + WGI landed in PostgreSQL, coverage verified (see Coverage).
 - **Transform:** dbt staging, intermediate, and five marts built in `s_vesnamalenica`: `wb_fct_gap_to_eu`, `wb_fct_stuck_matrix`, `wb_fct_sigma_convergence`, `wb_fct_years_to_close`, `wb_fct_governance`. Full `dbt build` passes with **78 tests across all 5 marts** — `accepted_values`, `not_null`, grain-uniqueness, and singular validity guards. Tests cover bucket classifications, indicator and role sets, the 5-vs-6-country sigma split, and years-to-close status consistency.
 - **Analysis:** `notebooks/01_analysis.ipynb` reads the marts and produces the convergence findings and the governance descriptive panel.
-- **Remaining:** Tableau dashboard (interactive rebuild in progress off the same marts).
+- **Tableau:** five interactive dashboards built off the same marts (consistency-passed); a narrative Story assembled from them, with final visual polish (unified palette, cover page) in progress.
 
 ## Data
 
@@ -86,7 +86,7 @@ Python (ingestion) → PostgreSQL (raw / staging / marts) → dbt (transform + t
     tests/           dbt: singular tests (grain / validity guards)
     dbt_project.yml  dbt project config (root-level)
     sql/             raw schema DDL + coverage checks
-    docs/            data_dictionary.md
+    docs/            data_dictionary.md, impact_and_recommendations.md
     notebooks/       00_verify_codes (indicator verification), 01_analysis (findings)
     tableau/         packaged workbook
 
@@ -122,8 +122,12 @@ A descriptive, small-sample study of open secondary data. The main limitations, 
 
 - **Kosovo data asymmetry.** No World Bank productivity series (17/17 null) and scattered labour-series gaps, but complete governance coverage. Rather than drop or impute, Kosovo is excluded from the 5-country productivity and 6-country sigma analyses and retained everywhere it has data. The asymmetry is reported as a finding.
 
+- **Flagged data artifact (Montenegro productivity).** Montenegro's productivity series carries a distortion in 2021 (a sharp spike and near-equal reversal the following year). The years-to-close and stuck-matrix use OLS slopes over the full decade specifically to blunt single-year distortions like this one; excluding 2021 lengthens Montenegro's productivity timeline further but does not change the century-plus finding. The artifact is disclosed rather than smoothed, and Montenegro's productivity figure is read as approximate.
+
 - **Association, not causation.** Any co-occurrence between governance and economic convergence — fast income catch-up alongside weak corruption control, for instance — is described, not explained. No governance-on-convergence regression is run; at n = 6 it would invite causal over-reading the data cannot support.
 
-- **Governance not ratio-scaled.** WGI scores are standardised 0–100, not ratio measures, so the gap / sigma / years-to-close machinery does not apply. Governance is presented on its own descriptive axis and cannot be integrated with the economic metrics on a common quantitative basis.
+- **Governance not ratio-scaled.** WGI scores are standardized 0–100, not ratio measures, so the gap / sigma / years-to-close machinery does not apply. Governance is presented on its own descriptive axis and cannot be integrated with the economic metrics on a common quantitative basis.
 
-- **Labour estimates.** National labour estimates are used rather than modeled-ILO series, because the modeled series is empty for Kosovo. This keeps Kosovo in the labour analysis but means the labour figures are not harmonised to the ILO modeled basis, which can differ across countries.
+- **Labour estimates.** National labour estimates are used rather than modeled-ILO series, because the modeled series is empty for Kosovo. This keeps Kosovo in the labour analysis but means the labour figures are not harmonized to the ILO modeled basis, which can differ across countries.
+
+- **Youth unemployment cannot separate recovery from emigration.** A falling youth-unemployment gap is not, on its own, evidence of a strengthening labour market: in this region it can equally reflect young people leaving the country, which lowers measured unemployment without any improvement in job creation. The project holds no migration data and cannot distinguish the two, so youth-unemployment movements carry an interpretive limit that total unemployment does not. Youth figures are therefore read as a signal to watch, not as a clean recovery indicator.
