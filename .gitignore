@@ -8,3 +8,7 @@ target/
 dbt_packages/
 logs/
 # end dbt Cloud content
+
+# Tableau temp/lock files
+~*.twbr
+*.twb.lock
