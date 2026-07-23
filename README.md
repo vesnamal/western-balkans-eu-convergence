@@ -42,7 +42,7 @@ Pipeline built end-to-end and producing verified results.
 
 The frozen, verified indicator basket lives in `config/indicators.yml` (single source of truth). Verification record: `notebooks/00_verify_codes.ipynb`.
 
-The gap-to-EU denominator uses the World Bank EUU aggregate. Its composition changed when the UK left the EU, raising the possibility of a structural break in the benchmark. This was checked directly: the EUU series is smooth across the window on all four convergence-metric indicators, with no compositional discontinuity, so Brexit is not a confound here. An independent Eurostat EU27=100 cross-check would add belt-and-suspenders triangulation and is documented as a limitation, not pending work (see Limitations).
+The gap-to-EU denominator uses the World Bank EUU aggregate. Its composition changed when the UK left the EU, raising the possibility of a structural break in the benchmark. This was checked directly: the EUU series is smooth across the window on all four convergence-metric indicators, with no compositional discontinuity, so Brexit is not a confound here. 
 
 ## Coverage
 
@@ -118,7 +118,7 @@ A descriptive, small-sample study of open secondary data. The main limitations, 
 
 - **Years-to-close is extrapolation, not forecast.** The figures divide the remaining 2024 gap by the 2014–2024 slope, assuming that pace holds. Real convergence decelerates near the frontier, so these values, if anything, understate the difficulty of the final stretch. Stated as current-pace extrapolation throughout; large values read as "effectively not converging," not as literal predictions.
 
-- **Single source, and EU-benchmark composition.** The economic indicators come almost entirely from World Bank WDI, with no independent triangulation, and the gap-to-EU denominator uses the EUU aggregate, whose composition changed with Brexit. The Brexit break was checked and found not to be present (the EUU series is smooth across the window on all four convergence indicators). An Eurostat EU27=100 cross-check would add an independent, fixed-composition triangulation; it is scoped as a documented limitation rather than built.
+- **Single source, and EU-benchmark composition.** The economic indicators come almost entirely from World Bank WDI, with no independent triangulation, and the gap-to-EU denominator uses the EUU aggregate, whose composition changed with Brexit. The Brexit break was checked and found not to be present (the EUU series is smooth across the window on all four convergence indicators). An Eurostat EU27=100 cross-check would provide independent, fixed-composition triangulation; it is out of scope here, so all gap-to-EU figures should be read as World Bank-internal comparisons.
 
 - **Kosovo data asymmetry.** No World Bank productivity series (17/17 null) and scattered labour-series gaps, but complete governance coverage. Rather than drop or impute, Kosovo is excluded from the 5-country productivity and 6-country sigma analyses and retained everywhere it has data. The asymmetry is reported as a finding.
 
