@@ -26,14 +26,14 @@ Albania, Bosnia & Herzegovina, Kosovo, Montenegro, North Macedonia, Serbia. Comp
 
 Country roles are carried in the dbt country dimension via a `role` field (`western_balkan`, `success_case`, `recent_entrant`, `eu_core`, and the EU aggregate row). `role` is the discriminator for all country-set filtering. The full EU-27 is included as a distributional backdrop; the six sit in the bottom tail of the EU distribution, not as part of the six-country sigma analysis.
 
-## Status
+## Pipeline
 
 Pipeline built end-to-end and producing verified results.
 
 - **Ingestion:** WDI + WGI landed in PostgreSQL, coverage verified (see Coverage).
 - **Transform:** dbt staging, intermediate, and five marts built in `s_vesnamalenica`: `wb_fct_gap_to_eu`, `wb_fct_stuck_matrix`, `wb_fct_sigma_convergence`, `wb_fct_years_to_close`, `wb_fct_governance`. Full `dbt build` passes with **78 tests across all 5 marts** — `accepted_values`, `not_null`, grain-uniqueness, and singular validity guards. Tests cover bucket classifications, indicator and role sets, the 5-vs-6-country sigma split, and years-to-close status consistency.
 - **Analysis:** `notebooks/01_analysis.ipynb` reads the marts and produces the convergence findings and the governance descriptive panel.
-- **Tableau:** five interactive dashboards built off the same marts (consistency-passed); a narrative Story assembled from them, with final visual polish (unified palette, cover page) in progress.
+- **Tableau:** five interactive dashboards built off the same marts, assembled into a seven-point narrative Story. Packaged as an extract workbook (tableau/western_balkans_convergence_extract.twbx) that opens without a database connection.
 
 ## Data
 
